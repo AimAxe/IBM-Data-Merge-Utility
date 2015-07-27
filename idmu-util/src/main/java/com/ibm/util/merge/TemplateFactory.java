@@ -22,9 +22,7 @@ import com.ibm.util.merge.db.ConnectionPoolManager;
 import com.ibm.util.merge.directive.AbstractDirective;
 import com.ibm.util.merge.directive.Directives;
 import com.ibm.util.merge.persistence.AbstractPersistence;
-import com.ibm.util.merge.template.CollectionName;
 import com.ibm.util.merge.template.Template;
-import com.ibm.util.merge.template.TemplateName;
 
 import org.apache.log4j.Logger;
 

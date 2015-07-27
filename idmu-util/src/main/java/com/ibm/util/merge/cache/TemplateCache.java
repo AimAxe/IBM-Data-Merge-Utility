@@ -17,9 +17,9 @@
 package com.ibm.util.merge.cache;
 
 import com.ibm.idmu.api.MemoryCache;
-import com.ibm.util.merge.template.CollectionName;
+import com.ibm.util.merge.CollectionName;
+import com.ibm.util.merge.TemplateName;
 import com.ibm.util.merge.template.Template;
-import com.ibm.util.merge.template.TemplateName;
 
 import java.util.*;
 

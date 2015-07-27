@@ -40,7 +40,7 @@ public class IntegrationTestingJdbcProvider {
 	File validateDir 	= new File("src/test/resources/valid/");
     File jdbcProperties = new File("src/test/resources/properties/databasePools.properties"); 
     JsonProxy jsonProxy = new PrettyJsonProxy();
-    AbstractPersistence persist = new FilesystemPersistence(templateDir, jsonProxy);
+    AbstractPersistence persist = new FilesystemPersistence(templateDir, "default", jsonProxy);
     ConnectionPoolManager poolManager = new ConnectionPoolManager();
     PoolManagerConfiguration config = PoolManagerConfiguration.fromPropertiesFile(jdbcProperties);
     

@@ -47,6 +47,7 @@ public class InitializeServlet extends HttpServlet {
 	private static final long serialVersionUID = -6542461667547308985L;
 	private Logger log = Logger.getLogger(InitializeServlet.class);
     private String warTemplatesPath = "/WEB-INF/templates";
+    private String defaultPackage = "system";
     private Boolean dbPersist = false;
     private Boolean prettyJson = true;
     private String jdbcPoolsPropertiesPath = "/WEB-INF/properties/databasePools.properties";
@@ -84,7 +85,7 @@ public class InitializeServlet extends HttpServlet {
             log.error("No database config will be applied");
         }
         JsonProxy jsonProxy = (prettyJson ? new PrettyJsonProxy() : new DefaultJsonProxy());
-        FilesystemPersistence filesystemPersistence = new FilesystemPersistence(templatesDirPath, jsonProxy);
+        FilesystemPersistence filesystemPersistence = new FilesystemPersistence(templatesDirPath, defaultPackage, jsonProxy);
         AbstractPersistence persist = (AbstractPersistence) (dbPersist ? filesystemPersistence : filesystemPersistence);
         TemplateFactory tf = new TemplateFactory(persist, jsonProxy, outputDirPath, poolManager);
         servletContext.setAttribute("TemplateFactory", tf);
@@ -121,6 +122,11 @@ public class InitializeServlet extends HttpServlet {
             log.info("Found so using passed system property value for merge-templates-folder: " + systemMergeTemplatesFolder);
             this.warTemplatesPath = systemMergeTemplatesFolder;
         }
+        String systemPackageName = System.getProperty("templates-default-package");
+        if(systemPackageName != null){
+            log.info("Found so using passed system property value for templates-default-package: " + systemPackageName);
+            this.defaultPackage = systemPackageName;
+        }
         String systemOutputRootDir = System.getProperty("merge-output-root");
         if(systemOutputRootDir != null){
             log.info("Found so using passed system property value for merge-output-root: " + systemOutputRootDir);
@@ -147,12 +153,17 @@ public class InitializeServlet extends HttpServlet {
         String mergeTemplatesFolder = servletInitParameters.get("merge-templates-folder");
         if (mergeTemplatesFolder != null) {
             log.info("Setting from ServletConfig: warTemplatesPath=" + mergeTemplatesFolder);
-            warTemplatesPath = mergeTemplatesFolder;
+            this.warTemplatesPath = mergeTemplatesFolder;
+        }
+        String packageName = servletInitParameters.get("templates-default-package");
+        if (packageName != null) {
+            log.info("Setting from ServletConfig: defaultPackage =" + packageName);
+            this.defaultPackage = packageName;
         }
         String outputRootDir = servletInitParameters.get("merge-output-root");
         if (outputRootDir != null) {
             log.info("Setting from ServletConfig: outputDirPath=" + outputRootDir);
-            outputDirPath = new File(outputRootDir);
+            this.outputDirPath = new File(outputRootDir);
         }
         String databasePoolsPropertiesPath = servletInitParameters.get("jdbc-pools-properties-path");
         if(databasePoolsPropertiesPath != null){

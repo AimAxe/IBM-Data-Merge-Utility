@@ -40,7 +40,7 @@ public class TemplateFactoryFilePersistTest {
 	private String templatesFolder = "src/test/resources/templates";
 	private File templatesDir = new File(templatesFolder);
 	private JsonProxy proxy = new DefaultJsonProxy();
-	private AbstractPersistence filePersist = new FilesystemPersistence(templatesDir, new PrettyJsonProxy());
+	private AbstractPersistence filePersist = new FilesystemPersistence(templatesDir, "default", new PrettyJsonProxy());
 	private File outputDir = new File("src/test/resources/testout/");
     ConnectionPoolManager manager = new ConnectionPoolManager();
     private TemplateFactory testFactory = new TemplateFactory(filePersist, proxy, outputDir, manager);

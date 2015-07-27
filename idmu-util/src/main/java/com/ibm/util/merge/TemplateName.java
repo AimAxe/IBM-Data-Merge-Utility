@@ -14,7 +14,9 @@
  * limitations under the License.
  *
  */
-package com.ibm.util.merge.template;
+package com.ibm.util.merge;
+
+import com.ibm.util.merge.template.Template;
 
 public class TemplateName implements Comparable<TemplateName> {
 	private final String collection;

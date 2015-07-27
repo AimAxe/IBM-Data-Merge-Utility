@@ -19,6 +19,7 @@ package com.ibm.util.merge.persistence;
 import com.google.gson.JsonSyntaxException;
 import com.ibm.idmu.api.JsonProxy;
 import com.ibm.util.merge.template.Template;
+
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -36,7 +37,9 @@ public class FilesystemPersistence extends AbstractPersistence {
     private final File templateFolder;
     private final JsonProxy jsonProxy;
 
-    public FilesystemPersistence(File templateFolder, JsonProxy jsonProxy) {
+    public FilesystemPersistence(File templateFolder, String defaultPackage, JsonProxy jsonProxy) {
+    	super(defaultPackage);
+        if(defaultPackage == null) throw new IllegalArgumentException("Missing default package");
         if(templateFolder == null) throw new IllegalArgumentException("Missing templateFolder");
         if(jsonProxy == null) throw new IllegalArgumentException("Missing jsonProxy");
         this.templateFolder = templateFolder;
@@ -57,25 +60,39 @@ public class FilesystemPersistence extends AbstractPersistence {
         if (templateFolder.listFiles() == null) {
             throw new RuntimeException("Template Folder data was not found! " + templateFolder);
         }
-        for (File file : templateFolder.listFiles()) {
-            log.debug("Inspect potential template file: " + file);
-            if (!file.isDirectory()) {
-                try {
-                    String json = new String(Files.readAllBytes(file.toPath()));
-                    Template template = jsonProxy.fromJSON(json, Template.class);
-                    templates.add(template);
-                    log.info("Loaded template " + template.getFullName() + " : " + file.getAbsolutePath());
-                    count++;
-                } catch (JsonSyntaxException e) {
-                    log.warn("Malformed JSON Template:" + file.getName(), e);
-                } catch (FileNotFoundException e) {
-                    log.info("Moving on after file read error on " + file.getName(), e);
-                } catch (IOException e) {
-                    log.warn("IOException Reading:" + file.getName(), e);
+        
+        for (File packageFolder : templateFolder.listFiles()) {
+            log.debug("Inspect potential package: " + packageFolder.getAbsoluteFile()); 
+            if (packageFolder.isDirectory()) {
+            	for (File file : packageFolder.listFiles()) {
+		            if (!file.isDirectory()) {
+		                log.debug("Inspect potential template: " + file);
+		                try {
+		                    String json = new String(Files.readAllBytes(file.toPath()));
+		                    Template template = jsonProxy.fromJSON(json, Template.class);
+		                    String collectionName = template.getCollection();
+		                    String packageName = this.getPackage(collectionName);
+		                    if (!packageName.equals(packageFolder.getName())) {
+	                    		log.warn("Template " + template.getFullName() + 
+	                    				" will not be loaded, it is in the wrong package " + 
+	                    				" template found at: " + packageFolder.getName() + 
+	                    				" other templates in the same collection found in " + packageName );
+		                    } else {
+		                    	this.addCollection(collectionName, packageName);
+			                    templates.add(template);
+			                    log.info("Loaded template " + template.getFullName() + " : " + file.getAbsolutePath());
+			                    count++;
+		                    }
+		                } catch (JsonSyntaxException e) {
+		                    log.warn("Malformed JSON Template:" + file.getName(), e);
+		                } catch (FileNotFoundException e) {
+		                    log.info("Moving on after file read error on " + file.getName(), e);
+		                } catch (IOException e) {
+		                    log.warn("IOException Reading:" + file.getName(), e);
+		                }
+		            }
                 }
             }
-
-
         }
         log.info("Loaded " + Integer.toString(count) + " templates from " + templateFolder);
         return templates;
@@ -87,10 +104,9 @@ public class FilesystemPersistence extends AbstractPersistence {
      * @param Template template the Template to save
      * @return a cloned copy of the Template ready for Merge Processing
      */
-	@Override
-    public void saveTemplate(Template template) {
+    public void saveTemplate(Template template, String packageName) {
 		deleteTemplate(template);
-        String fileName = templateFolder + File.separator + template.getFullName() + ".json";
+        String fileName = templateFolder + File.separator + packageName + File.separator + template.getFullName() + ".json";
         File file = new File(fileName);
         BufferedWriter bw = null;
         try {
@@ -126,62 +142,5 @@ public class FilesystemPersistence extends AbstractPersistence {
             log.error("File for template " + template.getFullName() + " does not exist at path " + file.getAbsolutePath());
         }
     }
-
-//    public static class TemplatePersistenceException extends RuntimeException {
-//    	// TO DO Serial Version UID
-//		private static final long serialVersionUID = 1L;
-//		private final Template template;
-//        private final File outputFilePath;
-//        private final String archiveEntryName;
-//
-//        public TemplatePersistenceException(Template template, File outputFilePath, String archiveEntryName, IOException e) {
-//            super("Error persisting template " + template.getFullName() + " to zip file at " + outputFilePath + " with entry name " + archiveEntryName, e);
-//            this.template = template;
-//            this.outputFilePath = outputFilePath;
-//            this.archiveEntryName = archiveEntryName;
-//        }
-//
-//        public Template getTemplate() {
-//            return template;
-//        }
-//
-//        public File getOutputFilePath() {
-//            return outputFilePath;
-//        }
-//
-//        public String getArchiveEntryName() {
-//            return archiveEntryName;
-//        }
-//    }
-
-//    public static class OutputDirectoryPathDoesNotExistException extends RuntimeException {
-//    	// TO DO Serial Version UID
-//		private static final long serialVersionUID = 1L;
-//		private String outputDirPath;
-//
-//        public OutputDirectoryPathDoesNotExistException(String outputDirPath) {
-//            super("The output directory does not exist: " + outputDirPath);
-//            this.outputDirPath = outputDirPath;
-//        }
-//
-//        public String getOutputDirPath() {
-//            return outputDirPath;
-//        }
-//    }
-//
-//    public static class NonDirectoryAtOutputDirectoryPathException extends RuntimeException {
-//    	// TO DO Serial Version UID
-//		private static final long serialVersionUID = 1L;
-//		private String outputDirPath;
-//
-//        public NonDirectoryAtOutputDirectoryPathException(String outputDirPath) {
-//            super("Path does not denote a directory: " + outputDirPath);
-//            this.outputDirPath = outputDirPath;
-//        }
-//
-//        public String getOutputDirPath() {
-//            return outputDirPath;
-//        }
-//    }
 
 }

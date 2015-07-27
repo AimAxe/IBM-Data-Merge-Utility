@@ -39,7 +39,7 @@ public class IntegrationSafety {
 	File outputDir 		= new File("src/test/resources/testout/");
 	File validateDir 	= new File("src/test/resources/valid/");
     JsonProxy jsonProxy = new PrettyJsonProxy();
-    AbstractPersistence persist = new FilesystemPersistence(templateDir, jsonProxy);
+    AbstractPersistence persist = new FilesystemPersistence(templateDir, "default", jsonProxy);
     ConnectionPoolManager manager = new ConnectionPoolManager();
     TemplateFactory tf 	= new TemplateFactory(persist, jsonProxy, outputDir, manager);
 

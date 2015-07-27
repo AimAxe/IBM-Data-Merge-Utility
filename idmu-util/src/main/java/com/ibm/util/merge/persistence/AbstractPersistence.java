@@ -18,15 +18,34 @@ package com.ibm.util.merge.persistence;
 
 import com.ibm.util.merge.template.Template;
 
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class AbstractPersistence {
-
-	public AbstractPersistence() {
-		
+	private final HashMap<String, String> packages = new HashMap<String,String>();
+	private final String defaultPackage;
+	
+	public AbstractPersistence(String defaultPackageName) {
+		this.defaultPackage = defaultPackageName;
 	}
 	
+	public void addCollection(String collectionName, String packageName) {
+		packages.putIfAbsent(collectionName, packageName);
+	}
+	
+	public String getPackage(String collectionName) {
+		if (packages.containsKey(collectionName)) {
+			return packages.get(collectionName);
+		} else
+			return this.defaultPackage;
+	}
+		
+	public void saveTemplate(Template template) {
+		String packageName = this.getPackage(template.getCollection());
+		this.saveTemplate(template, packageName);
+	}
+
+	public abstract void saveTemplate(Template template, String packageName);
 	public abstract List<Template> loadAllTemplates();
-	public abstract void saveTemplate(Template template);
 	public abstract void deleteTemplate(Template template);
 }

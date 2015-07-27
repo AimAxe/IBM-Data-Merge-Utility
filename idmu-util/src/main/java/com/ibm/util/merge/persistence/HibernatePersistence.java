@@ -17,6 +17,7 @@
 package com.ibm.util.merge.persistence;
 
 import com.ibm.util.merge.template.Template;
+
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -27,7 +28,8 @@ import java.util.List;
 public class HibernatePersistence extends AbstractPersistence {
     private Logger log = Logger.getLogger(HibernatePersistence.class);
 
-    public HibernatePersistence() {
+    public HibernatePersistence(String defaultPackage) {
+    	super(defaultPackage);
     	log.info("Instantiated");
     }
     
@@ -51,6 +53,12 @@ public class HibernatePersistence extends AbstractPersistence {
 		// TODO Delete the template if it exists, log errors, do not throw errors
         throw new UnsupportedOperationException("implement delete in DB");
     }
+
+	@Override
+	public void saveTemplate(Template template, String packageName) {
+		// TODO Auto-generated method stub
+        throw new UnsupportedOperationException("implement save in DB");
+	}
     
 
 }
